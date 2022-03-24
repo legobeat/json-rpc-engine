@@ -408,27 +408,27 @@ export class JsonRpcEngine extends SafeEventEmitter {
       returnHandler?: JsonRpcEngineReturnHandler,
     ) => {
       if (res.error) {
-        end(res.error);
-      } else {
-        if (returnHandler) {
-          if (typeof returnHandler !== 'function') {
-            end(
-              new EthereumRpcError(
-                errorCodes.rpc.internal,
-                `JsonRpcEngine: "next" return handlers must be functions. ` +
-                  `Received "${typeof returnHandler}" for request:\n${jsonify(
-                    req,
-                  )}`,
-                { request: req },
-              ),
-            );
-          }
-          returnHandlers.push(returnHandler);
-        }
-
-        // False indicates that the request should not end
-        resolve([null, false]);
+        return end(res.error);
       }
+
+      if (returnHandler) {
+        if (typeof returnHandler !== 'function') {
+          return end(
+            new EthereumRpcError(
+              errorCodes.rpc.internal,
+              `JsonRpcEngine: "next" return handlers must be functions. ` +
+                `Received "${typeof returnHandler}" for request:\n${jsonify(
+                  req,
+                )}`,
+              { request: req },
+            ),
+          );
+        }
+        returnHandlers.push(returnHandler);
+      }
+
+      // False indicates that the request should not end
+      return resolve([null, false]);
     };
 
     try {
